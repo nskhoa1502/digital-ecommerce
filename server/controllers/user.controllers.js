@@ -1,20 +1,22 @@
 const User = require("../models/user.model");
 const asyncHandler = require("express-async-handler");
+const createError = require("../utils/createError");
 
-const register = asyncHandler(async (req, res) => {
+const register = async (req, res, next) => {
   const { email, password, firstname, lastname } = req.body;
-  if (!email || !password || !firstname || !lastname) {
-    return res.status(400).json({
-      success: false,
-      message: "Missing inputs",
-    });
-  }
+  try {
+    if (!email || !password || !firstname || !lastname) {
+      throw createError(400, "Missing inputs");
+    }
 
-  const response = await User.create(req.body);
-  return res.status(200).json({
-    success: response ? true : false,
-    response,
-  });
-});
+    const response = await User.create(req.body);
+    return res.status(200).json({
+      success: response ? true : false,
+      response,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
 
 module.exports = { register };
