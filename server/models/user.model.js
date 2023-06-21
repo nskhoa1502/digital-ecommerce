@@ -1,4 +1,5 @@
 const mongoose = require("mongoose"); // Erase if already required
+const bcrypt = require("bcryptjs");
 
 // Declare the Schema of the Mongo model
 var userSchema = new mongoose.Schema(
@@ -55,6 +56,20 @@ var userSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+userSchema.pre("save", async function (next) {
+  /**
+   * Check if password field has been modified
+   * 1. true -> hash the new password
+   * 2. false -> continue
+   */
+  if (this.isModified("password")) {
+    const salt = bcrypt.genSaltSync(10);
+    this.password = await bcrypt.hash(this.password, salt);
+  }
+
+  next();
+});
 
 //Export the model
 module.exports = mongoose.model("User", userSchema);
