@@ -57,15 +57,15 @@ const login = async (req, res, next) => {
       const accessToken = generateAccessToken(response._id, role);
 
       // Generate refreshToken and update it in database
-      const refreshToken = generateRefreshToken(response._id);
+      const newRefreshToken = generateRefreshToken(response._id);
       await User.findByIdAndUpdate(
         response._id,
-        { refreshToken: refreshToken },
+        { refreshToken: newRefreshToken },
         { new: true }
       );
 
       // Store refreshToken into cookie
-      res.cookie("refreshToken", refreshToken, {
+      res.cookie("refreshToken", newRefreshToken, {
         httpOnly: true,
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
@@ -94,11 +94,11 @@ const getCurrentUser = async (req, res, next) => {
 
     // Find user in database
     const response = await User.findById({ _id }).select(
-      "-refreshToken -password -role"
+      "-refreshToken -password -role -passwordChangedAt -isBlocked"
     );
     // Send response
     return res.status(200).json({
-      success: true,
+      success: response ? true : false,
       result: response,
       message: "get current user successfully",
     });
@@ -252,6 +252,70 @@ const resetPassword = async (req, res, next) => {
   }
 };
 
+const getAllUsers = async (req, res, next) => {
+  try {
+    const response = await User.find().select(
+      "-refreshToken -password -passwordChangedAt -role -isBlocked"
+    );
+    return res.status(200).json({
+      success: response ? true : false,
+      users: response,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const deleteUser = async (req, res, next) => {
+  const { _id } = req.query;
+  try {
+    if (!_id) throw createError(400, "Missing Id");
+    const response = await User.findByIdAndDelete(_id);
+    return res.status(200).json({
+      success: response ? true : false,
+      deletedUser: response
+        ? `User with email ${response.email} has been deleted`
+        : "No user deleted",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const updateUser = async (req, res, next) => {
+  const { _id } = req.user;
+  try {
+    if (!_id || Object.keys(req.body)?.length === 0)
+      throw createError(400, "Missing input");
+    const response = await User.findByIdAndUpdate(_id, req.body, {
+      new: true,
+    }).select("-refreshToken -password -passwordChangedAt -role -isBlocked");
+    return res.status(200).json({
+      success: response ? true : false,
+      updatedUser: response ? response : "No fields have been updated",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const updateUserByAdmin = async (req, res, next) => {
+  const { uid } = req.params;
+  try {
+    if (!uid || Object.keys(req.body)?.length === 0)
+      throw createError(400, "Missing input");
+    const response = await User.findByIdAndUpdate(uid, req.body, {
+      new: true,
+    }).select("-refreshToken -password -passwordChangedAt -role -isBlocked");
+    return res.status(200).json({
+      success: response ? true : false,
+      updatedUser: response ? response : "No fields have been updated",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   login,
   register,
@@ -260,4 +324,8 @@ module.exports = {
   logout,
   forgotPassword,
   resetPassword,
+  getAllUsers,
+  deleteUser,
+  updateUser,
+  updateUserByAdmin,
 };

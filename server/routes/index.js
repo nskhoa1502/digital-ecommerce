@@ -8,7 +8,7 @@ const initRoutes = (app) => {
   app.use(errorHandler);
 
   app.use("/", (req, res) => {
-    res.send("Server on");
+    res.status(404).json({ message: `Route ${req.originalUrl} not found!` });
   });
 };
 

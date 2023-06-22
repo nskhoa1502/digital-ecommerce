@@ -18,4 +18,14 @@ const verifyAccessToken = async (req, res, next) => {
   }
 };
 
-module.exports = { verifyAccessToken };
+const verifyAdmin = async (req, res, next) => {
+  try {
+    const { role } = req.user;
+    if (role !== "admin") throw createError(401, "You are not authorized!");
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { verifyAccessToken, verifyAdmin };
