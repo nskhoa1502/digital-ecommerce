@@ -2,6 +2,9 @@ const User = require("../models/user.model");
 const asyncHandler = require("express-async-handler");
 const createError = require("../utils/createError");
 const jwt = require("jsonwebtoken");
+const sendMail = require("../utils/sendMail");
+const crypto = require("crypto");
+
 const {
   generateAccessToken,
   generateRefreshToken,
@@ -15,6 +18,7 @@ const register = async (req, res, next) => {
     }
 
     const user = await User.findOne({ email: email });
+    // console.log("hello world");
 
     // Check existing user
     if (user) throw createError(400, "User has existed");
@@ -24,7 +28,7 @@ const register = async (req, res, next) => {
     return res.status(200).json({
       success: newUser ? true : false,
       message: newUser
-        ? "Register successfully"
+        ? `Register successfully`
         : "Register failed, something went wrong",
     });
   } catch (err) {
@@ -171,10 +175,89 @@ const logout = async (req, res, next) => {
   }
 };
 
+/**
+ * RESET PASSWORD:
+ * 1/ Client send email
+ * 2/ Verify mail in client req -> Send back email + reset link (password change token)
+ * 3/ Client check mail -> Click reset link
+ * 4/ When click, client will go the api endpoint + password change token
+ * 5/ Verify the password token at server
+ * 6/ Change password
+ */
+
+const forgotPassword = async (req, res, next) => {
+  const { email } = req.query;
+
+  try {
+    if (!email) throw createError(400, "Missing Email");
+
+    const user = await User.findOne({ email });
+    if (!user) throw createError(401, "User not found");
+
+    // Call createResetPasswordToken method to generate password reset token
+    const resetToken = user.createResetPasswordToken();
+    await user.save();
+
+    const html = `
+  <div>
+  <h1>Xin vui lòng click vào link dưới đây để đổi mật khẩu của bạn.</h1>
+  <p>Link sẽ hết hạn trong 15 phút kể từ lúc gởi mail.</p>
+  <a href=${process.env.CLIENT_URL}/api/user/reset-password/${resetToken}>Click here</a>
+  </div>
+  `;
+
+    const data = {
+      email,
+      html,
+    };
+
+    const result = await sendMail(data);
+    return res.status(200).json({
+      success: true,
+      result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const resetPassword = async (req, res, next) => {
+  const { token, password } = req.body;
+  try {
+    if (!password) throw createError(400, "Please enter new password");
+    if (!token) throw createError(400, "Missing token");
+
+    const passwordResetToken = crypto
+      .createHash("sha256")
+      .update(token)
+      .digest("hex");
+    const user = await User.findOne({
+      passwordResetToken,
+      passwordResetExpire: { $gt: Date.now() },
+    });
+
+    if (!user) throw createError(401, "Invalid reset token");
+    user.password = password;
+    user.passwordResetToken = undefined;
+    user.passwordChangedAt = Date.now();
+    user.passwordResetExpire = undefined;
+    await user.save();
+
+    return res.status(200).json({
+      success: user ? true : false,
+      message: user ? "Updated password" : "Fail to update password",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   login,
   register,
   getCurrentUser,
   refreshAccessToken,
   logout,
+  forgotPassword,
+  resetPassword,
 };
