@@ -71,5 +71,11 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
+userSchema.methods = {
+  isCorrectPassword(password) {
+    return bcrypt.compareSync(password, this.password);
+  },
+};
+
 //Export the model
 module.exports = mongoose.model("User", userSchema);
