@@ -6,7 +6,7 @@ const generateAccessToken = (uid, role) =>
   });
 const generateRefreshToken = (uid) =>
   jwt.sign({ _id: uid }, process.env.JWT_SECRET, {
-    expiresIn: "7d",
+    expiresIn: "8d",
   });
 
 module.exports = {

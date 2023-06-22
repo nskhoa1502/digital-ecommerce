@@ -5,8 +5,10 @@ const { verifyAccessToken } = require("../middlewares/verifyToken");
 router.post("/register", controllers.register);
 router.post("/login", controllers.login);
 
-router.use(verifyAccessToken);
+router.post("/refreshToken", controllers.refreshAccessToken);
 
+router.use(verifyAccessToken);
 router.get("/current-user", controllers.getCurrentUser);
+router.get("/logout", controllers.logout);
 
 module.exports = router;

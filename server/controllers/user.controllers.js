@@ -1,15 +1,16 @@
 const User = require("../models/user.model");
 const asyncHandler = require("express-async-handler");
 const createError = require("../utils/createError");
+const jwt = require("jsonwebtoken");
 const {
   generateAccessToken,
   generateRefreshToken,
 } = require("../helper/generateToken");
 
 const register = async (req, res, next) => {
-  const { email, password, firstname, lastname } = req.body;
+  const { email, password, firstname, lastname, mobile } = req.body;
   try {
-    if (!email || !password || !firstname || !lastname) {
+    if (!email || !password || !firstname || !lastname || !mobile) {
       throw createError(400, "Missing inputs");
     }
 
@@ -42,7 +43,9 @@ const login = async (req, res, next) => {
     }
 
     // Find user in database
-    const response = await User.findOne({ email: email });
+    const response = await User.findOne({ email: email }).select(
+      "-refreshToken"
+    );
     if (response && response.isCorrectPassword(password)) {
       const { password, role, ...userData } = response.toObject();
 
@@ -100,4 +103,78 @@ const getCurrentUser = async (req, res, next) => {
   }
 };
 
-module.exports = { login, register, getCurrentUser };
+const refreshAccessToken = async (req, res, next) => {
+  // Extract cookie from client
+  const cookie = req.cookies;
+  // const {_id} = req.user
+
+  // If no refresh token in cookie => throw error
+  if (!cookie && !cookie.refreshToken)
+    throw createError(401, "No refresh token in cookies");
+
+  // Verify refresh token
+  jwt.verify(
+    cookie.refreshToken,
+    process.env.JWT_SECRET,
+    async (err, decodedToken) => {
+      if (err) return next(createError(401, "Invalid refresh token"));
+
+      // Find User with _id and matched refresh token
+      const { _id } = decodedToken;
+      const response = await User.findById({
+        _id,
+        refreshToken: cookie.refreshToken,
+      });
+      return res.status(200).json({
+        success: response ? true : false,
+        accessToken: response
+          ? generateAccessToken(response._id, response.role)
+          : "",
+        message: response
+          ? "Token has been refreshed"
+          : "Refresh token not match",
+      });
+    }
+  );
+  try {
+  } catch (error) {
+    next(error);
+  }
+};
+
+const logout = async (req, res, next) => {
+  const cookie = req.cookies;
+  try {
+    // Check if there is refresh token in cookie
+    if (!cookie || !cookie.refreshToken) {
+      throw createError(401, "No refresh token in cookies");
+    }
+
+    // Empty refresh token in database
+    const foundUser = await User.findOneAndUpdate(
+      { refreshToken: cookie.refreshToken },
+      { refreshToken: "" },
+      { new: true }
+    );
+
+    // Empty cookie in client
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+    });
+
+    return res.status(200).json({
+      success: foundUser ? true : false,
+      message: foundUser ? "Logout successfully" : "You have logout already",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = {
+  login,
+  register,
+  getCurrentUser,
+  refreshAccessToken,
+  logout,
+};
