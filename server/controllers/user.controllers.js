@@ -1,5 +1,4 @@
 const User = require("../models/user.model");
-const asyncHandler = require("express-async-handler");
 const createError = require("../utils/createError");
 const jwt = require("jsonwebtoken");
 const sendMail = require("../utils/sendMail");
