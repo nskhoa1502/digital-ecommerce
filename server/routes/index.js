@@ -1,8 +1,10 @@
 const errorHandler = require("../middlewares/errorHandler");
 const userRouter = require("./user.routes");
+const productRouter = require("./product.routes");
 
 const initRoutes = (app) => {
   app.use("/api/user", userRouter);
+  app.use("/api/product", productRouter);
 
   // Error handling
   app.use(errorHandler);
