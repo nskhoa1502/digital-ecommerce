@@ -9,6 +9,7 @@ router.get("/", controllers.getProducts);
 router.get("/:pid", controllers.getProduct);
 
 router.use(verifyAccessToken);
+router.put("/ratings", controllers.ratings);
 
 router.use(verifyAdmin);
 
