@@ -7,8 +7,8 @@ const {
 
 router.get("/", controllers.getBlogs);
 router.use(verifyAccessToken);
-router.put("/likeBlog", controllers.likeBlog);
-router.put("/dislikeBlog", controllers.dislikeBlog);
+router.put("/like/:bid", controllers.likeBlog);
+router.put("/dislike/:bid", controllers.dislikeBlog);
 
 router.use(verifyAdmin);
 router.post("/create-new", controllers.createNewBlog);

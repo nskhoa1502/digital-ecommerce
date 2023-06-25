@@ -66,7 +66,7 @@ const getBlogs = async (req, res, next) => {
 
 const likeBlog = async (req, res, next) => {
   const { _id } = req.user;
-  const { bid } = req.body;
+  const { bid } = req.params;
 
   try {
     if (!bid) throw createError(400, "Missing inputs");
@@ -121,7 +121,7 @@ const likeBlog = async (req, res, next) => {
 
 const dislikeBlog = async (req, res, next) => {
   const { _id } = req.user;
-  const { bid } = req.body;
+  const { bid } = req.params;
 
   try {
     if (!bid) throw createError(400, "Missing inputs");
