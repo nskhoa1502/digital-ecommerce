@@ -174,4 +174,51 @@ const dislikeBlog = async (req, res, next) => {
   }
 };
 
-module.exports = { getBlogs, createNewBlog, updateBlog, likeBlog, dislikeBlog };
+const excludedFields = " -refreshToken -password -role -createdAt -updatedAt";
+const includedFields = "firstname lastname";
+const getBlog = async (req, res, next) => {
+  const { bid } = req.params;
+  try {
+    const response = await Blog.findByIdAndUpdate(
+      bid,
+      {
+        $inc: { numberViews: 1 },
+      },
+      { new: true }
+    )
+      .populate("likes", includedFields)
+      .populate("dislikes", includedFields);
+
+    return res.status(200).json({
+      success: true,
+      response,
+      message: "get blog successfuly",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const deleteBlog = async (req, res, next) => {
+  const { bid } = req.params;
+  try {
+    const response = await Blog.findByIdAndDelete(bid);
+    return res.status(200).json({
+      success: true,
+      response,
+      message: response ? "Delete blog successfully" : "Delete blog failed",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = {
+  deleteBlog,
+  getBlog,
+  getBlogs,
+  createNewBlog,
+  updateBlog,
+  likeBlog,
+  dislikeBlog,
+};

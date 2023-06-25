@@ -16,7 +16,7 @@ var blogSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
-    memberViews: {
+    numberViews: {
       type: Number,
       default: 0,
     },
