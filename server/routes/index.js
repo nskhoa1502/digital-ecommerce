@@ -3,12 +3,14 @@ const userRouter = require("./user.routes");
 const productRouter = require("./product.routes");
 const productCategoryRouter = require("./productCategory.routes");
 const blogCategoryRouter = require("./blogCategory.routes");
+const blogRouter = require("./blog.routes");
 
 const initRoutes = (app) => {
   app.use("/api/user", userRouter);
   app.use("/api/product", productRouter);
   app.use("/api/prodCategory", productCategoryRouter);
   app.use("/api/blogCategory", blogCategoryRouter);
+  app.use("/api/blog", blogRouter);
 
   // Error handling
   app.use(errorHandler);
