@@ -314,6 +314,86 @@ const updateUserByAdmin = async (req, res, next) => {
     next(error);
   }
 };
+const updateUserAddress = async (req, res, next) => {
+  const { _id } = req.user;
+  console.log(_id);
+  try {
+    if (!req.body.address) throw createError(400, "Missing address");
+
+    const response = await User.findByIdAndUpdate(
+      _id,
+      { $push: { address: req.body.address } },
+      {
+        new: true,
+      }
+    ).select("-refreshToken -password -passwordChangedAt -role -isBlocked");
+    return res.status(200).json({
+      success: response ? true : false,
+      updatedUser: response ? response : "No fields have been updated",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const updateCart = async (req, res, next) => {
+  const { _id } = req.user;
+  const { pid, quantity, color } = req.body;
+  try {
+    if (!pid || !quantity | !color) throw createError(400, "missing inputs");
+    const user = await User.findById(_id).select("cart");
+
+    const existingProduct = user?.cart?.find(
+      (item) => item?.product?.toString() === pid && item?.color === color
+    );
+    console.log(existingProduct);
+
+    if (existingProduct) {
+      if (existingProduct.color === color) {
+        const response = await User.updateOne(
+          {
+            cart: {
+              $elemMatch: {
+                product: existingProduct.product,
+                color: existingProduct.color,
+              },
+            },
+          },
+          { $set: { ["cart.$.quantity"]: quantity } }
+        );
+        return res.status(200).json({
+          success: true,
+          response,
+          message: response ? "Update cart successfully" : "Update cart failed",
+        });
+      } else {
+        const response = await User.findByIdAndUpdate(
+          _id,
+          { $push: { cart: { product: pid, quantity, color } } },
+          { new: true }
+        );
+        return res.status(200).json({
+          success: true,
+          response,
+          message: response ? "Update cart successfully" : "Update cart failed",
+        });
+      }
+    } else {
+      const response = await User.findByIdAndUpdate(
+        _id,
+        { $push: { cart: { product: pid, quantity, color } } },
+        { new: true }
+      );
+      return res.status(200).json({
+        success: true,
+        response,
+        message: response ? "Update cart successfully" : "Update cart failed",
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
 
 module.exports = {
   login,
@@ -327,4 +407,6 @@ module.exports = {
   deleteUser,
   updateUser,
   updateUserByAdmin,
+  updateUserAddress,
+  updateCart,
 };

@@ -213,6 +213,30 @@ const deleteBlog = async (req, res, next) => {
   }
 };
 
+const uploadImageBlog = async (req, res, next) => {
+  const { bid } = req.params;
+  try {
+    if (!req.file) throw createError(400, "Missing images");
+    const response = await Blog.findByIdAndUpdate(
+      bid,
+      {
+        image: req.file.path,
+      },
+      { new: true }
+    );
+    console.log(response);
+    return res.status(200).json({
+      status: response ? true : false,
+      updatedProduct: response ? response : null,
+      message: response
+        ? "Upload image blog success"
+        : "Upload image blog failed",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   deleteBlog,
   getBlog,
@@ -221,4 +245,5 @@ module.exports = {
   updateBlog,
   likeBlog,
   dislikeBlog,
+  uploadImageBlog,
 };

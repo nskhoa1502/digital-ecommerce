@@ -22,6 +22,8 @@ router.get("/check-user", (req, res, next) => {
 });
 
 router.use(verifyAdmin);
+router.put("/update-address", controllers.updateUserAddress);
+router.put("/update-cart", controllers.updateCart);
 router.put("/:uid", controllers.updateUserByAdmin);
 router.delete("/", controllers.deleteUser);
 router.get("/", controllers.getAllUsers);

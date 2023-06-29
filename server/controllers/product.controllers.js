@@ -207,6 +207,28 @@ const ratings = async (req, res, next) => {
   }
 };
 
+const uploadImageProduct = async (req, res, next) => {
+  const { pid } = req.params;
+  try {
+    if (!req.files) throw createError(400, "Missing images");
+    const response = await Product.findByIdAndUpdate(
+      pid,
+      {
+        $push: { images: { $each: req.files.map((file) => file.path) } },
+      },
+      { new: true }
+    );
+    console.log(response);
+    return res.status(200).json({
+      status: response ? true : false,
+      updatedProduct: response ? response : null,
+      message: response ? "Upload image success" : "Upload image failed",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   deleteProduct,
   updateProduct,
@@ -214,4 +236,5 @@ module.exports = {
   getProduct,
   getProducts,
   ratings,
+  uploadImageProduct,
 };
