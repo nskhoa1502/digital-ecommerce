@@ -7,6 +7,7 @@ const blogRouter = require("./blog.routes");
 const brandRouter = require("./brand.routes");
 const couponRouter = require("./coupon.routes");
 const orderRouter = require("./order.routes");
+const insertRouter = require("./insert.routes");
 
 const initRoutes = (app) => {
   app.use("/api/user", userRouter);
@@ -17,6 +18,7 @@ const initRoutes = (app) => {
   app.use("/api/brand", brandRouter);
   app.use("/api/coupon", couponRouter);
   app.use("/api/order", orderRouter);
+  app.use("/api/insert", insertRouter);
 
   // Error handling
   app.use(errorHandler);
