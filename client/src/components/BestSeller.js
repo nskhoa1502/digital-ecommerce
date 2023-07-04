@@ -74,12 +74,13 @@ const BestSeller = () => {
         {" "}
         <Slider {...settings}>
           {products?.map((el) => (
-            <Product
-              key={el?._id}
-              productData={el}
-              isNew={activeTab === 1 ? false : true}
-              pid={el?._id}
-            />
+            <React.Fragment key={el?._id}>
+              <Product
+                productData={el}
+                isNew={activeTab === 1 ? false : true}
+                pid={el?._id}
+              />
+            </React.Fragment>
           ))}
         </Slider>
       </div>
