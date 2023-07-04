@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import { createSlug } from "../utils/helpers";
 import { useDispatch, useSelector } from "react-redux";
@@ -9,7 +9,7 @@ const Sidebar = () => {
   const dispatch = useDispatch();
   useEffect(() => {
     dispatch(getCategories());
-  }, []);
+  }, [dispatch]);
   return (
     <div className="flex flex-col">
       {categories?.length > 0 &&
