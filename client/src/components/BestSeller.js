@@ -34,13 +34,13 @@ const BestSeller = () => {
           apiGetProducts({ sort: "-createdAt" }),
         ]);
 
-        setBestSellers(response[0].data.response);
-        setNewProducts(response[1].data.response);
+        setBestSellers(response[0]?.data?.response);
+        setNewProducts(response[1]?.data?.response);
         //   console.log(response);
         //   console.log(bestSeller);
         //   console.log(newProducts);
       } catch (error) {
-        console.error(error.response.data);
+        console.error(error?.response?.data || "Could not connect to server");
       }
       // console.log({ , newProducts });
       // if(response[0])

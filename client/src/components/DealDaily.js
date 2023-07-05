@@ -1,9 +1,13 @@
 import React, { useEffect, useState } from "react";
 import icons from "../utils/icons";
 import { apiGetProducts } from "../apis/product";
-import { formatMoney, renderStarFromNumber } from "../utils/helpers";
+import {
+  formatMoney,
+  renderStarFromNumber,
+  secondsToHms,
+} from "../utils/helpers";
 import { Countdown } from "./";
-
+import moment from "moment";
 const { AiFillStar, FiMenu } = icons;
 
 const DealDaily = () => {
@@ -20,13 +24,19 @@ const DealDaily = () => {
         page: Math.round(Math.random() * 10),
         totalRatings: 5,
       });
-      console.log(response.data);
-      setDealDaily(response.data?.response[0]);
-      setHour(23);
-      setMinute(59);
-      setSecond(59);
+      // console.log(response?.data);
+      setDealDaily(response?.data?.response[0]);
+
+      const today = `${moment().format("MM/DD/YYYY")} 5:00:00`;
+      const seconds =
+        new Date(today).getTime() - new Date().getTime() + 24 * 3600 * 1000;
+      console.log(seconds);
+      const number = secondsToHms(seconds);
+      setHour(number.h);
+      setMinute(number.m);
+      setSecond(number.s);
     } catch (error) {
-      console.error(error.response.data);
+      console.error(error?.response?.data || "Could not connect to server");
     }
   };
   useEffect(() => {
@@ -34,6 +44,7 @@ const DealDaily = () => {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     idInterval = setInterval(() => {
       if (second > 0) {
         setSecond((prev) => prev - 1);
@@ -62,7 +73,7 @@ const DealDaily = () => {
     fetchDealDaily();
   }, [expireTime, idInterval]);
   return (
-    <div className="border border-black w-full flex-auto">
+    <div className="w-full flex-auto">
       <h3 className="flex items-center justify-between ">
         <span className="flex-1 flex items-center justify-center">
           <AiFillStar color="red" />
