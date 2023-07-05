@@ -30,7 +30,6 @@ const DealDaily = () => {
       const today = `${moment().format("MM/DD/YYYY")} 5:00:00`;
       const seconds =
         new Date(today).getTime() - new Date().getTime() + 24 * 3600 * 1000;
-      console.log(seconds);
       const number = secondsToHms(seconds);
       setHour(number.h);
       setMinute(number.m);
