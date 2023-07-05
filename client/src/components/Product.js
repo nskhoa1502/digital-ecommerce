@@ -4,6 +4,8 @@ import newLabel from "../assets/new.png";
 import trendingLabel from "../assets/trending.png";
 import { SelectOption } from "./";
 import icons from "../utils/icons";
+import { Link } from "react-router-dom";
+import path from "../utils/path";
 
 const { AiFillEye, FiMenu, BsFillSuitHeartFill } = icons;
 
@@ -12,8 +14,9 @@ const Product = ({ productData, isNew, pid }) => {
 
   return (
     <div className="w-full px-5  ">
-      <div
-        className="w-full  p-[15px] flex flex-col items-center"
+      <Link
+        to={`/${path.DETAIL_PRODUCT}/${productData?._id}/${productData?.title}`}
+        className="w-full  py-[15px] flex flex-col items-center"
         onMouseEnter={(e) => {
           e.stopPropagation();
           setIsShowOption(true);
@@ -49,7 +52,7 @@ const Product = ({ productData, isNew, pid }) => {
           <span className="line-clamp-1">{productData?.title}</span>
           <span>{formatMoney(productData?.price)} VND</span>
         </div>
-      </div>
+      </Link>
     </div>
   );
 };

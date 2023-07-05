@@ -3,7 +3,7 @@ import * as actions from "../thunks/appThunks";
 
 const initialState = {
   categories: [],
-  //   isLoading: false,
+  isLoading: false,
   errorMessage: null,
 };
 

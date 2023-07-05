@@ -37,6 +37,7 @@ const fn2 = async (categoryData) => {
   await ProductCategory.create({
     title: categoryData?.category,
     brand: categoryData?.brand,
+    image: categoryData?.image,
   });
 };
 

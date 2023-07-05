@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { apiGetProducts } from "../apis/product";
-import { Product } from "../components";
-import Slider from "react-slick";
+import { CustomSlider } from "./";
+import { useDispatch, useSelector } from "react-redux";
+import { getNewProducts } from "../store/thunks/productThunks";
 
 const tabs = [
   {
@@ -12,30 +13,19 @@ const tabs = [
   { id: 3, name: "tablet" },
 ];
 
-const settings = {
-  dots: false,
-  infinite: false,
-  speed: 500,
-  slidesToShow: 3,
-  slidesToScroll: 1,
-};
-
 const BestSeller = () => {
   const [bestSeller, setBestSellers] = useState(null);
-  const [newProducts, setNewProducts] = useState(null);
   const [activeTab, setActiveTab] = useState(1);
   const [products, setProducts] = useState(null);
+  const { newProducts } = useSelector((state) => state.product);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await Promise.all([
-          apiGetProducts({ sort: "-sold" }),
-          apiGetProducts({ sort: "-createdAt" }),
-        ]);
+        const response = await apiGetProducts({ sort: "-sold" });
 
-        setBestSellers(response[0]?.data?.response);
-        setNewProducts(response[1]?.data?.response);
+        setBestSellers(response?.data?.response);
         //   console.log(response);
         //   console.log(bestSeller);
         //   console.log(newProducts);
@@ -46,6 +36,7 @@ const BestSeller = () => {
       // if(response[0])
     };
     fetchProducts();
+    dispatch(getNewProducts());
   }, []);
 
   useEffect(() => {
@@ -71,18 +62,7 @@ const BestSeller = () => {
         ))}
       </div>
       <div className="mt-4 mx-[-20px]  border-t-2 border-main">
-        {" "}
-        <Slider {...settings}>
-          {products?.map((el) => (
-            <React.Fragment key={el?._id}>
-              <Product
-                productData={el}
-                isNew={activeTab === 1 ? false : true}
-                pid={el?._id}
-              />
-            </React.Fragment>
-          ))}
-        </Slider>
+        <CustomSlider products={products} activeTab={activeTab} />{" "}
       </div>
       <div className="w-full flex gap-4 mt-4 justify-between">
         <img

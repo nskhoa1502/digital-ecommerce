@@ -17,7 +17,7 @@ const createCategory = async (req, res, next) => {
 
 const getCategories = async (req, res, next) => {
   try {
-    const response = await ProductCategory.find().select("title _id");
+    const response = await ProductCategory.find();
     return res.status(200).json({
       success: true,
       response,

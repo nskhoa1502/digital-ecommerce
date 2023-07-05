@@ -5,9 +5,19 @@ import {
   DealDaily,
   FeaturedProduct,
   Sidebar,
+  Product,
+  CustomSlider,
+  TopHeader,
 } from "../../components";
+import { useSelector } from "react-redux";
+import icons from "../../utils/icons";
 
+const { IoIosArrowForward } = icons;
 const Home = () => {
+  const { newProducts } = useSelector((state) => state.product);
+  const { categories } = useSelector((state) => state.app);
+  console.log(categories);
+
   return (
     <>
       <div className="w-main flex">
@@ -23,7 +33,54 @@ const Home = () => {
       <div className="my-8">
         <FeaturedProduct />
       </div>
-      <div className="w-full h-[500px]"></div>
+      <div className="my-8 w-full">
+        <h3 className="text-[20px] font-semibold py-[15px] border-b-2 border-main ">
+          NEW ARRIVALS
+        </h3>
+        <div className="mt-4 mx-[-20px] ">
+          <CustomSlider products={newProducts} />
+        </div>
+      </div>
+      <div className="my-8 w-full">
+        <h3 className="text-[20px] font-semibold py-[15px] border-b-2 border-main ">
+          HOT COLLECTIONS
+        </h3>
+        <div className="flex flex-wrap gap-4 mt-4 ">
+          {categories
+            ?.filter((cate) => cate?.brand?.length > 0)
+            ?.map((el) => (
+              <div
+                key={el._id}
+                className="w-[396px] h-[190px] min flex p-4 border gap-4"
+              >
+                <img
+                  src={el?.image}
+                  alt=""
+                  className="  w-[144px] h-[129px] object-cover  flex-1"
+                />
+                <div className="flex-1 text-gray-700">
+                  <h4 className="font-semibold uppercase">{el?.title}</h4>
+                  <ul className="text-sm">
+                    {el?.brand?.map((item) => (
+                      <div
+                        key={item}
+                        className="flex gap-2 items-center text-gray-500"
+                      >
+                        <IoIosArrowForward size={14} />
+                        <li>{item}</li>
+                      </div>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            ))}
+        </div>
+      </div>
+      <div className="my-8 w-full">
+        <h3 className="text-[20px] font-semibold py-[15px] border-b-2 border-main ">
+          BLOG POSTS
+        </h3>
+      </div>
     </>
   );
 };
