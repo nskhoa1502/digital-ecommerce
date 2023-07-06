@@ -12,7 +12,7 @@ const {
 const register = async (req, res, next) => {
   const { email, password, firstname, lastname, mobile } = req.body;
   try {
-    if (!email || !password || !firstname || !lastname || !mobile) {
+    if (!email || !password || !firstname || !lastname) {
       throw createError(400, "Missing inputs");
     }
 
