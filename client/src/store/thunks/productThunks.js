@@ -6,7 +6,7 @@ export const getNewProducts = createAsyncThunk(
   async (payload, { rejectWithValue }) => {
     try {
       const response = await apis.apiGetProducts({ sort: "-createdAt" });
-      console.log(response.data.response);
+      //   console.log(response.data.response);
       return response.data.response;
     } catch (error) {
       return rejectWithValue(error.response.data);

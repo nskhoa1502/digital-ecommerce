@@ -16,7 +16,8 @@ const { IoIosArrowForward } = icons;
 const Home = () => {
   const { newProducts } = useSelector((state) => state.product);
   const { categories } = useSelector((state) => state.app);
-  console.log(categories);
+  const { isLoggedIn, userData } = useSelector((state) => state.user);
+  console.log(userData);
 
   return (
     <>

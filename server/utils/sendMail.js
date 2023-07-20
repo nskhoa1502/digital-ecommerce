@@ -1,7 +1,7 @@
 const nodemailer = require("nodemailer");
 const createError = require("./createError");
 
-const sendMail = async ({ email, html }) => {
+const sendMail = async ({ email, html, subject }) => {
   try {
     let transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
@@ -16,7 +16,7 @@ const sendMail = async ({ email, html }) => {
     let info = await transporter.sendMail({
       from: '"DigitalShop" <no-reply@DigitalShop.com>', // sender address
       to: email, // list of receivers
-      subject: "Forgot password", // Subject line
+      subject: subject, // Subject line
       html: html, // html body
     });
 

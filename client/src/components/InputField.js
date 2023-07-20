@@ -1,8 +1,15 @@
 import React, { useState } from "react";
 
-const InputField = ({ value, setValue, nameKey, type }) => {
+const InputField = ({
+  value,
+  setValue,
+  nameKey,
+  type,
+  invalidFields,
+  setInvalidFields,
+}) => {
   return (
-    <div className="w-full relative">
+    <div className="w-full relative flex flex-col mb-2">
       {value?.trim() !== "" && (
         <label
           className="text-[10px] absolute top-0 left-[12px] block bg-white px-1 animate-slide-top-sm"
@@ -21,9 +28,14 @@ const InputField = ({ value, setValue, nameKey, type }) => {
         onChange={(e) =>
           setValue((prev) => ({ ...prev, [nameKey]: e.target.value }))
         }
-        // onFocus={() => setIsFocus(true)}
+        onFocus={() => setInvalidFields([])}
         // onBlur={() => setIsFocus(false)}
       />
+      {invalidFields?.some((el) => el?.name === nameKey) && (
+        <small className="text-main text-[10px] ">
+          {invalidFields?.find((el) => el.name === nameKey)?.mes}
+        </small>
+      )}
     </div>
   );
 };

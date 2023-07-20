@@ -30,3 +30,48 @@ export const secondsToHms = (d) => {
   const s = Math.floor((d % 3600) % 60);
   return { h, m, s };
 };
+
+export const validate = (payload, setInvalidFields) => {
+  let invalids = 0;
+  const formatPayload = Object.entries(payload);
+  // console.log(formatPayload);
+  for (let arr of formatPayload) {
+    if (arr[1].trim() === "") {
+      invalids++;
+      setInvalidFields((prev) => [
+        ...prev,
+        { name: arr[0], mes: "Require this field" },
+      ]);
+    }
+  }
+
+  for (let arr of formatPayload) {
+    switch (arr[0]) {
+      case "email":
+        const regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+        if (!arr[1].match(regex)) {
+          invalids++;
+          setInvalidFields((prev) => [
+            ...prev,
+            { name: arr[0], mes: "Email Invalid" },
+          ]);
+        }
+
+        break;
+      case "password":
+        if (!arr[1].trim().length < 6) {
+          invalids++;
+          setInvalidFields((prev) => [
+            ...prev,
+            { name: arr[0], mes: "Password minimum 6 characters" },
+          ]);
+        }
+
+        break;
+
+      default:
+        break;
+    }
+  }
+  return invalids;
+};

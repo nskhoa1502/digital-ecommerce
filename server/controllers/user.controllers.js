@@ -3,14 +3,43 @@ const createError = require("../utils/createError");
 const jwt = require("jsonwebtoken");
 const sendMail = require("../utils/sendMail");
 const crypto = require("crypto");
+const makeToken = require("uniqid");
 
 const {
   generateAccessToken,
   generateRefreshToken,
 } = require("../helper/generateToken");
 
+// const register = async (req, res, next) => {
+//   const { email, password, firstname, lastname, mobile } = req.body;
+//   try {
+//     if (!email || !password || !firstname || !lastname) {
+//       throw createError(400, "Missing inputs");
+//     }
+
+//     const user = await User.findOne({ email: email });
+//     // console.log("hello world");
+
+//     // Check existing user
+//     if (user) throw createError(400, "User has existed");
+
+//     const newUser = await User.create(req.body);
+
+//     return res.status(200).json({
+//       success: newUser ? true : false,
+//       message: newUser
+//         ? `Register successfully`
+//         : "Register failed, something went wrong",
+//     });
+//   } catch (err) {
+//     next(err);
+//   }
+// };
+
 const register = async (req, res, next) => {
   const { email, password, firstname, lastname, mobile } = req.body;
+  // console.log(mobile);
+  console.log(req.body);
   try {
     if (!email || !password || !firstname || !lastname) {
       throw createError(400, "Missing inputs");
@@ -21,17 +50,69 @@ const register = async (req, res, next) => {
 
     // Check existing user
     if (user) throw createError(400, "User has existed");
+    const token = makeToken();
+    res.cookie(
+      "dataregister",
+      { ...req.body, token },
+      {
+        httpOnly: true,
+        maxAge: 15 * 60 * 1000,
+      }
+    );
+    const html = `
+    <div>
+    <h1>Xin vui lòng click vào link dưới đây để hoàn tất quá trình đăng ký của bạn.</h1>
+    <p>Link sẽ hết hạn trong 15 phút kể từ lúc gởi mail.</p>
+    <a href=${process.env.URL_SERVER}/api/user/finalregister/${token}>Click here</a>
+    </div>
+    `;
 
-    const newUser = await User.create(req.body);
-
+    await sendMail({ email, html, subject: "Hoàn tất đăng ký Digital World" });
     return res.status(200).json({
-      success: newUser ? true : false,
-      message: newUser
-        ? `Register successfully`
-        : "Register failed, something went wrong",
+      success: true,
+      message: "Please check your email to activate account",
     });
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const finalRegister = async (req, res, next) => {
+  try {
+    const cookie = req.cookies;
+    // console.log(cookie.dataregister);
+
+    const { token } = req.params;
+    // console.log(cookie?.dataregister);
+    // console.log(token);
+    // res.status(200).json({
+    //   success: true,
+    //   cookie,
+    //   token,
+    // });
+    if (!cookie || cookie?.dataregister?.token !== token) {
+      return res
+        .clearCookie("dataregister")
+        .redirect(`${process.env.CLIENT_URL}/finalregister/failed`);
+    }
+    const newUser = await User.create({
+      email: cookie?.dataregister?.email,
+      password: cookie?.dataregister?.password,
+      mobile: cookie?.dataregister?.mobile,
+      firstname: cookie?.dataregister?.firstname,
+      lastname: cookie?.dataregister?.lastname,
+    });
+
+    if (newUser)
+      return res
+        .clearCookie("dataregister")
+        .redirect(`${process.env.CLIENT_URL}/finalregister/success`);
+    else
+      return res
+        .clearCookie("dataregister")
+        .redirect(`${process.env.CLIENT_URL}/finalregister/failed`);
+  } catch (error) {
+    next(error);
   }
 };
 
@@ -185,7 +266,7 @@ const logout = async (req, res, next) => {
  */
 
 const forgotPassword = async (req, res, next) => {
-  const { email } = req.query;
+  const { email } = req.body;
 
   try {
     if (!email) throw createError(400, "Missing Email");
@@ -199,21 +280,24 @@ const forgotPassword = async (req, res, next) => {
 
     const html = `
   <div>
-  <h1>Xin vui lòng click vào link dưới đây để đổi mật khẩu của bạn.</h1>
-  <p>Link sẽ hết hạn trong 15 phút kể từ lúc gởi mail.</p>
-  <a href=${process.env.CLIENT_URL}/api/user/reset-password/${resetToken}>Click here</a>
+  <h1>Please click the link below to change your password</h1>
+  <p>Link will expire in 15 minutes.</p>
+  <a href=${process.env.CLIENT_URL}/reset-password/${resetToken}>Click here</a>
   </div>
   `;
 
     const data = {
       email,
       html,
+      subject: "Forgot password",
     };
 
     const result = await sendMail(data);
     return res.status(200).json({
       success: true,
-      result,
+      message: result.response?.includes("OK")
+        ? "An email has been sent to you, please check your inbox."
+        : "Something went wrong, please try again",
     });
   } catch (error) {
     next(error);
@@ -409,4 +493,5 @@ module.exports = {
   updateUserByAdmin,
   updateUserAddress,
   updateCart,
+  finalRegister,
 };

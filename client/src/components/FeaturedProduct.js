@@ -9,7 +9,7 @@ const FeaturedProduct = () => {
       limit: 9,
       totalRatings: 5,
     });
-    console.log(res.data.response);
+    // console.log(res.data.response);
     setProducts(res.data.response);
   };
 

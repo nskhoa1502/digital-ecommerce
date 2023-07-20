@@ -8,6 +8,7 @@ module.exports = {
       },
       backgroundColor: {
         main: "#ee3131",
+        overlay: "rgba(0,0,0,0.3)",
       },
       colors: {
         main: "#ee3131",
@@ -45,11 +46,23 @@ module.exports = {
             transform: "translateY(0px)",
           },
         },
+        "slide-left": {
+          "0%": {
+            "-webkit-transform": "translateX(5000px);",
+            transform: "translateX(5000px);",
+          },
+          "100%": {
+            "-webkit-transform": "translateX(0px)",
+            transform: "translateX(0px)",
+          },
+        },
       },
       animation: {
         "slide-top":
           "slide-top 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both",
         "slide-top-sm": "slide-top-sm 0.2s linear both",
+        "slide-left":
+          "slide-left 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both",
       },
     },
     plugins: [require("@tailwindcss/line-clamp")],
